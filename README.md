@@ -3,10 +3,8 @@ A python script that enables users to manage Google Calendar without using the L
 
 To install dependencies, run the following command in terminal:
 
-```sudo pip3 install -r requirements.txt```
+	```sudo pip3 install -r requirements.txt```
 
-Navigate to the directory of the script and then run the following command
+Navigate to the directory of the script and then run the following command in terminal:
 
-```python3 quickstart.py```
-
-
+	```python3 quickstart.py```

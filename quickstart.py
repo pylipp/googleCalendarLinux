@@ -65,7 +65,7 @@ def main():
     
     try:
         reqd_date = datetime.datetime.strptime(input('\nEnter the date for which you would like to access Google Calendar (dd/mm/yyyy): '), "%d/%m/%Y")			#Inputting the date for which calendar has to be accessed
-    except ValueError:
+    except NameError:
         print('Illegal Date Format. Kindly enter the date in dd/mm/yyyy format.')
         sys.exit()
 
