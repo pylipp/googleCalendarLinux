@@ -63,53 +63,53 @@ def main():
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http)
     
-    try:
-        reqd_date = datetime.datetime.strptime(input('\nEnter the date for which you would like to access Google Calendar (dd/mm/yyyy): '), "%d/%m/%Y")			#Inputting the date for which calendar has to be accessed
-    except NameError:
-        print('Illegal Date Format. Kindly enter the date in dd/mm/yyyy format.')
-        sys.exit()
-
     while 1:		#Menu Driven program to allow user to execute the required function
         try:
-            choice = input('\nWhat would you like to do?\n\t1. Read Events\t2. Get Details of an Event\n\t3. Create Event\t4. Delete Event\n\t5. Edit Events\t6. Exit\nYour Choice: ')
-        except NameError:
-            print('Illegal input.')
+            print('\n', '-'*50)
+            choice = int(input('What would you like to do?\n\t1. Read Events\t\t2. Get Details of an Event\n\t3. Create Event\t\t4. Delete Event\n\t5. Edit Events\t\t6. Exit\nYour Choice: '))
+        except ValueError:
+            choice = 7
 
-        if choice == '1':
-            read(service, reqd_date)
-        elif choice == '2':
+        if choice == 1:
+            read(service)
+        elif choice == 2:
             elaborate(service)
-        elif choice == '3':
+        elif choice == 3:
             create(service)
-        elif choice == '4':
+        elif choice == 4:
             delevent(service)
-        elif choice == '5':
+        elif choice == 5:
             edit(service)
-        elif choice == '6':
+        elif choice == 6:
             print('\nExiting. Have a nice day!')
             sys.exit()
         else:
              print('Kindly enter a valid number between 1-6.')
 
 
-def read(service, reqd_date):
+def read(service):
     #Allows user to see all the events on the given day in calendar
-    print('')
-    finish_date = reqd_date + datetime.timedelta(1,0,0)
+    try:
+        start_date = datetime.datetime.strptime(input('\nDate to read from (dd/mm/yyyy): '), "%d/%m/%Y")         #Inputting the date for which calendar has to be accessed
+        finish_date = datetime.datetime.strptime(input('Date to read till (dd/mm/yyyy): '), "%d/%m/%Y")         #Inputting the date for which calendar has to be accessed
+        finish_date = finish_date + datetime.timedelta(1,0,0)
+    except ValueError:
+        print('Illegal Date Format. Kindly enter the date in dd/mm/yyyy format.')
+        return
+    
     eventsResult = service.events().list(
-        calendarId='primary', timeMin=reqd_date.isoformat()+'Z', timeMax=finish_date.isoformat()+'Z', singleEvents=True,
+        calendarId='primary', timeMin=start_date.isoformat()+'Z', timeMax=finish_date.isoformat()+'Z', singleEvents=True,
         orderBy='startTime').execute()
     events = eventsResult.get('items', [])
 
     if not events:
         print('No upcoming events found.')
     else:
+        print('')
         print(events.__len__(), ' events found.')
-        i = 1
 
     for event in events:
-        print('ID:', event['id'], '  ---  ', 'Title:', event['summary'])
-        i=i+1
+        print('\tID:', event['id'], '  ---  ', 'Title:', event['summary'])
 
 def elaborate(service):
     #Allows user to see details of a particular event in the calendar. Specially modified for the attendees field of an event
@@ -133,6 +133,12 @@ def elaborate(service):
         elif param == 'attendees':
         	for att in event[param]:
         		print(att['email'])
+        elif param == 'start':
+            print ('start:', start.split('T')[0], ',', start.split('T')[1].split('+')[0])
+        elif param == 'end':
+            print('end:', end.split('T')[0], ', ',  end.split('T')[1].split('+')[0])
+        elif param in ['organizer', 'creator']:
+            print (param, ':', event[param]['displayName'])
         elif param in event.keys():
         	print (param, ':', event[param])
         else:
@@ -147,22 +153,21 @@ def edit(service):
     except:
     	print('Invalid ID. Please try again.')
     	return
+
     start = event['start'].get('dateTime', event['start'].get('date'))
     end = event['end'].get('dateTime', event['end'].get('date'))
     print (event['summary'], 'from', start.split('T')[0], ',', start.split('T')[1].split('+')[0], 'till', end.split('T')[0], ', ',  end.split('T')[1].split('+')[0])
     
     master = 1
     while master == 1:
-        param = input('Which detail would you like to modify? (Enter "see" to see all current details, "none" to exit): ')
+        param = input('\nWhich detail would you like to modify? (Enter "see" to see all current details, "none" to exit): ')
         param = param.lower()
         if param == 'none':
         	master = 0
-#            continue
         
         elif param == 'see':
         	for par in event:
         		print(par, ':', event[par])
-#            continue
         
         elif param == 'start':
         	offset = timezone*(+1)
@@ -178,6 +183,10 @@ def edit(service):
         	endDateTime = str(end.date())+'T'+str(end.time())+'Z'
         	event[param]['dateTime'] = endDateTime
         
+        elif param == 'id':
+            print('Sorry! ID of an event can not be modified!')
+            continue
+
         elif param == 'attendees':
         	if param not in event.keys():
         		event[param] = []
@@ -196,7 +205,6 @@ def edit(service):
         				flag = 1        #attendee found, setting flag to 1
         		if flag == 0:           #flag is 0 if attendee is not found
         			print('Attendee not found.')
-        	
         	else:
         		print('Invalid Input. Kindly enter 0 or 1.')
         
@@ -204,15 +212,23 @@ def edit(service):
             if param not in event.keys():
             	event[param] = ''
             event[param] = input('Enter value to be stored with this parameter: ')
+        
         try:
-        	updated_event = service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+            event = service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+            if param not in ['see', 'none']:
+                print('Event Modified!')
         except:
-          	print ('No such detail exists. Please enter valid parameters of the \'event\' object. eg: description, location, attendees, visibility, colorId, recurrence etc.')
+          	print ('Please check the parameter and value entered. Ensure valid parameters of the \'event\' object are entered. eg: description, location, attendees, visibility, colorId, recurrence etc. Also ensure value entered for the parameter is typesafe.')
 
 def create(service):
 	#Allows users to create new event. Specially modified for start/end date-times, number of attendees, title, location, id and description
     print('\nEnter details for the new event.')
     e_id = input('\nID (length between 5-1024 using lowercase a-v & 0-9): ')
+    for char in e_id:
+        if not (char.isdigit() or (ord(char)>=97 and ord(char)<=118)):
+            print('Event ID entered is illegal. Please enter characters between lowercase a-v or digits 0-9. Also, length of ID must be between 5-1024.')
+            return
+    
     summary = input('Title: ')
     location = input('Location: ')
     description = input('Description: ')
@@ -227,7 +243,12 @@ def create(service):
     end = end + datetime.timedelta(0,offset,0)
     endDateTime = str(end.date())+'T'+str(end.time())+'Z'
 
-    att = input('Enter Number of Attendees: ')
+    try:
+        att = int(input('Enter Number of Attendees: '))
+    except ValueError:
+        print('Please enter a valid number.')
+        return
+
     attendees = []
     for i in range(0, att):
         attendees.append({'email':input('Enter email of Attendee #'+str(i+1)+': ')})
@@ -252,7 +273,11 @@ def create(service):
           ],
         },
     }
-    event = service.events().insert(calendarId='primary', body=event).execute()
+    try:
+        event = service.events().insert(calendarId='primary', body=event).execute()
+        print('Event has been added!')
+    except:
+        print(event)
 
 def delevent(service):
 	#Allows user to delete an event according to event ID
