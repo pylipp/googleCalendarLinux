@@ -1,5 +1,5 @@
 # googleCalendarLinux
-A python script that enables users to manage Google Calendar without using the Linux terminal!
+A python script that enables users to manage Google Calendar directly from the Linux terminal!
 
 To install dependencies, run the following command in terminal:
 
