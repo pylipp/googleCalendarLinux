@@ -5,7 +5,7 @@ setup(
         version='0.1',
         description='TODO',
         url='http://github.com/pylipp/gcalendar',
-        author='Philipp Metzner',
+        author='navjot12, Philipp Metzner',
         author_email='beth.aleph@yahoo.de',
         license='GPLv3',
         #classifiers=[],
