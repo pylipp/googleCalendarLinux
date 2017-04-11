@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import uuid
-from datetime import datetime, timedelta
-from time import timezone
 import logging
+
+import maya
 
 
 logger = logging.getLogger(__name__)
@@ -72,8 +72,7 @@ def create(service, calendarId='primary', event_id=None, summary="",
 
 DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
 
-def _convert_datetime(date):
-    date = datetime.strptime(date, DATETIME_FORMAT)
-    date += timedelta(0, timezone, 0)
-    return "{}T{}Z".format(date.date(), date.time())
-
+def _convert_datetime(date, day_first=True):
+    """Create timestamp from datetime string."""
+    date = maya.parse(date, day_first=day_first)
+    return date.iso8601()
