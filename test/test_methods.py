@@ -10,7 +10,6 @@ class ServiceTestCase(unittest.TestCase):
     def setUpClass(cls):
         cls.service = utils.build_service()
 
-class CreateTestCase(ServiceTestCase):
     def test_create_only(self):
         methods.create(self.service,
                 summary="Test summary",
@@ -21,6 +20,13 @@ class CreateTestCase(ServiceTestCase):
                 attendees=["foo@bar.com"]
                 )
         self.assertTrue(True)
+
+    def test_list(self):
+        calendars = dict(methods.list(self.service))
+        # assuming the calendar list contains at least the 'Week numbers'
+        self.assertGreaterEqual(len(calendars), 1)
+        self.assertIn("Week Numbers", calendars.keys())
+
 
 if __name__ == "__main__":
     unittest.main()

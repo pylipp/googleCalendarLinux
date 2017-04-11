@@ -67,3 +67,18 @@ def create(service, calendarId='primary', event_id=None, summary="",
     logger.info("Created event: {}".format(event))
     response = service.events().insert(calendarId=calendarId, body=event).execute()
     logger.info("Received response: {}".format(response))
+
+
+def list(service):
+    """
+    Generator function yielding a (summary, ID) tuple for every calendar.
+
+    Convenient to find out the human-readable name (summary) and the ID of the
+    calendar.
+    """
+
+    response = service.calendarList().list().execute()
+    logger.info("Received response: {}".format(response))
+
+    for item in response["items"]:
+        yield item["summary"], item["id"]
