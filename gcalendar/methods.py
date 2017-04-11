@@ -3,8 +3,7 @@
 import uuid
 import logging
 
-import maya
-
+from .utils import convert_datetime
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -39,8 +38,8 @@ def create(service, calendarId='primary', event_id=None, summary="",
     if event_id is None:
         event_id = uuid.uuid4().hex
 
-    datetime_start = _convert_datetime(start)
-    datetime_end = _convert_datetime(end)
+    datetime_start = convert_datetime(start)
+    datetime_end = convert_datetime(end)
 
     attendee_emails = [{"email": mail} for mail in attendees]
 
@@ -68,11 +67,3 @@ def create(service, calendarId='primary', event_id=None, summary="",
     logger.info("Created event: {}".format(event))
     response = service.events().insert(calendarId=calendarId, body=event).execute()
     logger.info("Received response: {}".format(response))
-
-
-DATETIME_FORMAT = "%d/%m/%Y %H:%M:%S"
-
-def _convert_datetime(date, day_first=True):
-    """Create timestamp from datetime string."""
-    date = maya.parse(date, day_first=day_first)
-    return date.iso8601()

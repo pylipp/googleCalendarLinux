@@ -2,18 +2,13 @@
 
 import unittest
 
-import httplib2
-from apiclient import discovery
-
-from gcalendar import methods, main
+from gcalendar import methods, utils
 
 
 class ServiceTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        credentials = main.get_credentials()
-        http = credentials.authorize(httplib2.Http())
-        cls.service = discovery.build('calendar', 'v3', http=http)
+        cls.service = utils.build_service()
 
 class CreateTestCase(ServiceTestCase):
     def test_create_only(self):
