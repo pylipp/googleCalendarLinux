@@ -13,6 +13,8 @@ import datetime
 from time import timezone
 from math import fabs
 
+import gcalendar.methods as methods
+
 try:
     import argparse
     flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
@@ -62,7 +64,7 @@ def main():
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http)
-    
+
     while 1:		#Menu Driven program to allow user to execute the required function
         try:
             print('\n', '-'*50)
@@ -96,7 +98,7 @@ def read(service):
     except ValueError:
         print('Illegal Date Format. Kindly enter the date in dd/mm/yyyy format.')
         return
-    
+
     eventsResult = service.events().list(
         calendarId='primary', timeMin=start_date.isoformat()+'Z', timeMax=finish_date.isoformat()+'Z', singleEvents=True,
         orderBy='startTime').execute()
@@ -157,32 +159,32 @@ def edit(service):
     start = event['start'].get('dateTime', event['start'].get('date'))
     end = event['end'].get('dateTime', event['end'].get('date'))
     print (event['summary'], 'from', start.split('T')[0], ',', start.split('T')[1].split('+')[0], 'till', end.split('T')[0], ', ',  end.split('T')[1].split('+')[0])
-    
+
     master = 1
     while master == 1:
         param = input('\nWhich detail would you like to modify? (Enter "see" to see all current details, "none" to exit): ')
         param = param.lower()
         if param == 'none':
         	master = 0
-        
+
         elif param == 'see':
         	for par in event:
         		print(par, ':', event[par])
-        
+
         elif param == 'start':
         	offset = timezone*(+1)
         	start = datetime.datetime.strptime(input('Enter new Start date & time (dd/mm/yyyy hh:mm:ss): '), "%d/%m/%Y %H:%M:%S")
         	start = start + datetime.timedelta(0,offset,0)
         	startDateTime = str(start.date())+'T'+str(start.time())+'Z'
         	event[param]['dateTime'] = startDateTime
-        
+
         elif param == 'end':
         	offset = timezone*(+1)
         	end = datetime.datetime.strptime(input('Enter new End date & time (dd/mm/yyyy hh:mm:ss): '), "%d/%m/%Y %H:%M:%S")
         	end = end + datetime.timedelta(0,offset,0)
         	endDateTime = str(end.date())+'T'+str(end.time())+'Z'
         	event[param]['dateTime'] = endDateTime
-        
+
         elif param == 'id':
             print('Sorry! ID of an event can not be modified!')
             continue
@@ -207,12 +209,12 @@ def edit(service):
         			print('Attendee not found.')
         	else:
         		print('Invalid Input. Kindly enter 0 or 1.')
-        
+
         else:
             if param not in event.keys():
             	event[param] = ''
             event[param] = input('Enter value to be stored with this parameter: ')
-        
+
         try:
             event = service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
             if param not in ['see', 'none']:
@@ -226,22 +228,15 @@ def create(service):
     e_id = input('\nID (length between 5-1024 using lowercase a-v & 0-9): ')
     for char in e_id:
         if not (char.isdigit() or (ord(char)>=97 and ord(char)<=118)):
-            print('Event ID entered is illegal. Please enter characters between lowercase a-v or digits 0-9. Also, length of ID must be between 5-1024.')
-            return
-    
+            print('Event ID entered is illegal. A random UUID will be generated.')
+            e_id = None
+
     summary = input('Title: ')
     location = input('Location: ')
     description = input('Description: ')
 
-    offset = timezone
-    
-    start = datetime.datetime.strptime(input('Start Date & Time (dd/mm/yyyy hh:mm:ss): '), "%d/%m/%Y %H:%M:%S")
-    start = start + datetime.timedelta(0,offset,0)
-    startDateTime = str(start.date())+'T'+str(start.time())+'Z'
-
-    end = datetime.datetime.strptime(input('End Date & Time (dd/mm/yyyy hh:mm:ss): '), "%d/%m/%Y %H:%M:%S")
-    end = end + datetime.timedelta(0,offset,0)
-    endDateTime = str(end.date())+'T'+str(end.time())+'Z'
+    start = input('Start Date & Time (dd/mm/yyyy hh:mm:ss): ')
+    end = input('End Date & Time (dd/mm/yyyy hh:mm:ss): ')
 
     try:
         att = int(input('Enter Number of Attendees: '))
@@ -251,33 +246,17 @@ def create(service):
 
     attendees = []
     for i in range(0, att):
-        attendees.append({'email':input('Enter email of Attendee #'+str(i+1)+': ')})
-    
-    event = {
-        'id': e_id,
-        'summary': summary,
-        'location': location,
-        'description': description,
-        'start': {
-          'dateTime': startDateTime,
-        },
-        'end': {
-          'dateTime': endDateTime,
-        },
-        'attendees': attendees,
-        'reminders': {
-          'useDefault': False,
-          'overrides': [
-            {'method': 'email', 'minutes': 24 * 60},
-            {'method': 'popup', 'minutes': 10},
-          ],
-        },
-    }
+        attendees.append(input('Enter email of Attendee #'+str(i+1)+': '))
+
     try:
-        event = service.events().insert(calendarId='primary', body=event).execute()
+        methods.create(service, event_id=e_id, summary=summary,
+                location=location, description=description, start=start,
+                end=end, attendees=attendees)
         print('Event has been added!')
-    except:
-        print(event)
+    except AttributeError:
+        raise
+    except Exception as e:
+        print("Error creating event: {}".format(e))
 
 def delevent(service):
 	#Allows user to delete an event according to event ID
