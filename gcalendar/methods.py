@@ -32,7 +32,7 @@ def create(service, calendarId='primary', event_id=None, summary="",
     :type attendees: list[str]
     """
 
-    if not all([summary, location, description, start, end, attendees]):
+    if not all([summary, start, end]):
         raise AttributeError("Missing mandatory argument")
 
     if event_id is None:
@@ -41,7 +41,7 @@ def create(service, calendarId='primary', event_id=None, summary="",
     datetime_start = convert_datetime(start)
     datetime_end = convert_datetime(end)
 
-    attendee_emails = [{"email": mail} for mail in attendees]
+    attendee_emails = [] if attendees is None else [{"email": mail} for mail in attendees]
 
     event = {
         'id': event_id,
