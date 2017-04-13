@@ -3,6 +3,8 @@
 import uuid
 import logging
 
+import maya
+
 from .utils import convert_datetime
 
 logger = logging.getLogger(__name__)
@@ -74,6 +76,41 @@ def create(service, calendarId='primary', event_id=None, summary="",
     logger.info("Created event: {}".format(event))
     response = service.events().insert(calendarId=calendarId, body=event).execute()
     logger.info("Received response: {}".format(response))
+
+
+def fetch_events(service, calendarId='primary', start=None, end=None):
+    """
+    Fetch events of the specified calendar between start and end date.
+
+    :param calendarId: ID of the calendar to insert the event. Default: 'primary'
+    :type calendarId: str
+
+    :param start: start date of the query in format dd/mm/yyyy
+    :type start: str
+
+    :param end: end date of the query in format dd/mm/yyyy. By default, this is
+        24 hours after the start date.
+    :type end: str
+    """
+
+    if start is None:
+        raise AttributeError("Please provide start date for query.")
+
+    if end is None:
+        end = start
+
+    # include events of entire end day
+    end = maya.parse(end).add(hours=24).iso8601()
+
+    logger.info("Reading events")
+    response = service.events().list(
+            calendarId=calendarId, timeMin=convert_datetime(start),
+            timeMax=end, singleEvents=True, orderBy='startTime').execute()
+
+    events = response['items']
+    logger.info("Nr. of events found: {}".format(len(events)))
+
+    return events
 
 
 def list(service):

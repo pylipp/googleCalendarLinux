@@ -44,23 +44,22 @@ def main():
 def read(service):
     #Allows user to see all the events on the given day in calendar
     try:
-        start_date = datetime.datetime.strptime(input('\nDate to read from (dd/mm/yyyy): '), "%d/%m/%Y")         #Inputting the date for which calendar has to be accessed
-        finish_date = datetime.datetime.strptime(input('Date to read till (dd/mm/yyyy): '), "%d/%m/%Y")         #Inputting the date for which calendar has to be accessed
-        finish_date = finish_date + datetime.timedelta(1,0,0)
+        start_date = input('\nDate to read from (dd/mm/yyyy): ')
+        finish_date = input('Date to read till (dd/mm/yyyy): ')
     except ValueError:
         print('Illegal Date Format. Kindly enter the date in dd/mm/yyyy format.')
         return
 
-    eventsResult = service.events().list(
-        calendarId='primary', timeMin=start_date.isoformat()+'Z', timeMax=finish_date.isoformat()+'Z', singleEvents=True,
-        orderBy='startTime').execute()
-    events = eventsResult.get('items', [])
+    events = methods.fetch_events(service,
+            start=start_date,
+            end=finish_date
+            )
 
     if not events:
         print('No upcoming events found.')
     else:
         print('')
-        print(events.__len__(), ' events found.')
+        print(len(events), 'events found.')
 
     for event in events:
         print('\tID:', event['id'], '  ---  ', 'Title:', event['summary'])
