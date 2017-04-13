@@ -210,13 +210,14 @@ def create(service):
         print("Error creating event: {}".format(e))
 
 def delevent(service):
-	#Allows user to delete an event according to event ID
+    #Allows user to delete an event according to event ID
     eventId = input('Enter ID of the event to be deleted: ')
     try:
-    	service.events().delete(calendarId='primary', eventId=eventId).execute()
-    	print('\nEvent deleted!')
-    except:
-        print('\nInvalid event ID!')
+        methods.delete_event(service, eventId)
+        print('Event deleted!')
+    except Exception as e:
+        print("Error deleting event: {}".format(e))
+
 
 if __name__ == '__main__':
     main()

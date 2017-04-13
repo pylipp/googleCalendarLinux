@@ -113,6 +113,25 @@ def fetch_events(service, calendarId='primary', start=None, end=None):
     return events
 
 
+def delete_event(service, event_id, calendarId='primary'):
+    """
+    Delete event specified by ID from calendar.
+
+    :param event_id: ID of the event to be deleted
+    :type event_id: str
+
+    :param calendarId: ID of the calendar to insert the event. Default: 'primary'
+    :type calendarId: str
+    """
+
+    logger.info("About to delete event with ID {}".format(event_id))
+    try:
+        service.events().delete(calendarId=calendarId, eventId=event_id).execute()
+        logger.info("Successfully deleted event")
+    except:
+        raise
+
+
 def list(service):
     """
     Generator function yielding a (summary, ID) tuple for every calendar.
