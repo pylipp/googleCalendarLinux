@@ -13,7 +13,8 @@ logger.addHandler(handler)
 
 
 def create(service, calendarId='primary', event_id=None, summary="",
-        location="", description="", start=None, end=None, attendees=None):
+        location="", description="", start=None, end=None, attendees=None,
+        enable_reminders=True):
     """
     Create an event request object and insert it in the calendar's events.
 
@@ -30,6 +31,10 @@ def create(service, calendarId='primary', event_id=None, summary="",
 
     :param attendees: list of attendees' emails
     :type attendees: list[str]
+
+    :param enable_reminders: If true (default), send email a day before the
+        event and display a popup 10 minutes in advance.
+    :type enable_reminders: bool
     """
 
     if not all([summary, start, end]):
@@ -55,14 +60,16 @@ def create(service, calendarId='primary', event_id=None, summary="",
           'dateTime': datetime_end,
         },
         'attendees': attendee_emails,
-        'reminders': {
+        }
+
+    if enable_reminders:
+        event['reminders'] = {
             'useDefault': False,
             'overrides': [
                 {'method': 'email', 'minutes': 24 * 60},
                 {'method': 'popup', 'minutes': 10},
                 ],
-        },
-    }
+            }
 
     logger.info("Created event: {}".format(event))
     response = service.events().insert(calendarId=calendarId, body=event).execute()
