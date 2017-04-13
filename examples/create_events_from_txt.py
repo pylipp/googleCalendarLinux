@@ -2,6 +2,7 @@
 """
 Example script that reads in working day and hours from a file and creates the
 respective events. Useful if your working hours are tracked on GoogleCalendar.
+Events that are already present will be updated.
 """
 
 import os
@@ -42,9 +43,25 @@ service = utils.build_service()
 calendarId = dict(methods.list(service))["MUC working students attendance"]
 
 for workday in workdays:
+    events = methods.fetch_events(service,
+            calendarId=calendarId,
+            start=workday.start.split()[0]
+            )
+    summary = "Philipp Metzner"
+
+    existing_event = None
+    for event in events:
+        if event["summary"] == summary:
+            existing_event = event
+            break
+    if existing_event is not None:
+        print("Event already exists, is being updated!")
+        methods.delete_event(service, existing_event["id"],
+                calendarId=calendarId)
+
     methods.create(service,
             calendarId=calendarId,
-            summary="Philipp Metzner",
+            summary=summary,
             start=workday.start,
             end=workday.end
             )
