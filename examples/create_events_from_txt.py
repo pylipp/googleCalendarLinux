@@ -63,5 +63,6 @@ for workday in workdays:
             calendarId=calendarId,
             summary=summary,
             start=workday.start,
-            end=workday.end
+            end=workday.end,
+            enable_reminders=False
             )
