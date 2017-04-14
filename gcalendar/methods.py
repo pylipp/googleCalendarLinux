@@ -119,10 +119,11 @@ def fetch_events(service, calendarId='primary', start=None, end=None):
     if end is None:
         end = start
 
-    # include events of entire end day
-    end = maya.parse(end).add(hours=24).iso8601()
+    logger.info("Reading events from {} to {}".format(start, end))
 
-    logger.info("Reading events")
+    # include events of entire end day, day_first!!
+    end = convert_datetime(end, hours=24)
+
     response = service.events().list(
             calendarId=calendarId, timeMin=convert_datetime(start),
             timeMax=end, singleEvents=True, orderBy='startTime').execute()

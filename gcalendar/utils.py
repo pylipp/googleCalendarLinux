@@ -10,9 +10,26 @@ from oauth2client import tools
 from oauth2client.file import Storage
 
 
-def convert_datetime(date, day_first=True):
-    """Create timestamp from datetime string."""
+def convert_datetime(date, day_first=True, **timedeltas):
+    """Create timestamp from datetime string. Optionally timedeltas can be
+    passed, they will be added after parsing the date string.
+
+    :param date: Date to create the timestamp from
+    :type date: str
+
+    :param day_first: Kwarg for maya.parse() to distinguish ambiguous dates
+    :type day_first: bool
+
+    :param timedeltas: Kwargs to pass to maya.MayaDT.add(), e.g. hours,
+        minutes, seconds.
+    :type timedeltas: float
+    """
+
     date = maya.parse(date, day_first=day_first)
+
+    if timedeltas:
+        date = date.add(**timedeltas)
+
     return date.iso8601()
 
 
