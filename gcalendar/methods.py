@@ -26,7 +26,7 @@ def create(service, calendarId='primary', event_id=None, summary="",
     :param calendarId: ID of the calendar to insert the event. Default: 'primary'
     :type calendarId: str
 
-    :param event_id: unique ID to identify the event. By default, a UUID is created
+    :param event_id: unique ID to identify the event. Created by Google if omitted
     :type event_id: str
 
     :param start: event starting datetime in format dd/mm/yyyy hh:mm:ss.
@@ -48,13 +48,13 @@ def create(service, calendarId='primary', event_id=None, summary="",
 
     :raises AttributeError: if any argument of summary, start or end is unspecified
     :raises Errors are propagated from the apiclient module.
+
+    :returns event_id: ID of the created event, if successful
+    :type event_id: str
     """
 
-    if not all([summary, start, end]):
+    if not all([start, end]):
         raise AttributeError("Missing mandatory argument")
-
-    if event_id is None:
-        event_id = uuid.uuid4().hex
 
     datetime_start = convert_datetime(start)
     datetime_end = convert_datetime(end)
@@ -62,7 +62,6 @@ def create(service, calendarId='primary', event_id=None, summary="",
     attendee_emails = [] if attendees is None else [{"email": mail} for mail in attendees]
 
     event = {
-        'id': event_id,
         'summary': summary,
         'location': location,
         'description': description,
@@ -75,6 +74,9 @@ def create(service, calendarId='primary', event_id=None, summary="",
         'attendees': attendee_emails,
         }
 
+    if event_id is not None:
+        event['id'] = event_id
+
     if enable_reminders:
         event['reminders'] = {
             'useDefault': False,
@@ -86,9 +88,12 @@ def create(service, calendarId='primary', event_id=None, summary="",
 
     event.update(body_kwargs)
 
-    logger.info("Created event: {}".format(event))
+    logger.info("About to create event")
     response = service.events().insert(calendarId=calendarId, body=event).execute()
-    logger.info("Received response: {}".format(response))
+    event_id = response["id"]
+    logger.info("Successfully created event with ID={}".format(event_id))
+
+    return event_id
 
 
 def fetch_events(service, calendarId='primary', start=None, end=None):
@@ -142,7 +147,7 @@ def delete_event(service, event_id, calendarId='primary'):
         the event_id is not found.)
     """
 
-    logger.info("About to delete event with ID {}".format(event_id))
+    logger.info("About to delete event with ID={}".format(event_id))
     service.events().delete(calendarId=calendarId, eventId=event_id).execute()
     logger.info("Successfully deleted event")
 

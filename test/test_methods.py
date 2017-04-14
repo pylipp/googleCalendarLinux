@@ -67,5 +67,14 @@ class ServiceTestCase(unittest.TestCase):
 
         methods.delete_event(self.service, event_id)
 
+    def test_create_without_event_id(self):
+        start = "16/04/2017"
+        event_id = methods.create(self.service,
+                start="{} 08:00:00".format(start),
+                end="{} 16:00:00".format(start)
+                )
+
+        methods.delete_event(self.service, event_id)
+
 if __name__ == "__main__":
     unittest.main()
