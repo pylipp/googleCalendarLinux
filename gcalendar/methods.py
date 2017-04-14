@@ -122,14 +122,14 @@ def delete_event(service, event_id, calendarId='primary'):
 
     :param calendarId: ID of the calendar to insert the event. Default: 'primary'
     :type calendarId: str
+
+    :raises Errors are propagated from the apiclient module (e.g. HTTPError if
+        the event_id is not found.)
     """
 
     logger.info("About to delete event with ID {}".format(event_id))
-    try:
-        service.events().delete(calendarId=calendarId, eventId=event_id).execute()
-        logger.info("Successfully deleted event")
-    except:
-        raise
+    service.events().delete(calendarId=calendarId, eventId=event_id).execute()
+    logger.info("Successfully deleted event")
 
 
 def list(service):
