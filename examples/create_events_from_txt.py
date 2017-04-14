@@ -40,7 +40,7 @@ with open(os.path.join(script_dir, "2017_working_hours.txt")) as f:
             continue
 
 service = utils.build_service()
-calendarId = dict(methods.list(service))["MUC working students attendance"]
+calendarId = dict(methods.list_calendars(service))["MUC working students attendance"]
 
 for workday in workdays:
     events = methods.fetch_events(service,
@@ -59,7 +59,7 @@ for workday in workdays:
         methods.delete_event(service, existing_event["id"],
                 calendarId=calendarId)
 
-    methods.create(service,
+    methods.create_event(service,
             calendarId=calendarId,
             summary=summary,
             start=workday.start,

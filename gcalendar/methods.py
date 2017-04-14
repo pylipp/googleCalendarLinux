@@ -17,7 +17,7 @@ handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 
-def create(service, calendarId='primary', event_id=None, summary="",
+def create_event(service, calendarId='primary', event_id=None, summary="",
         location="", description="", start=None, end=None, attendees=None,
         enable_reminders=True, **body_kwargs):
     """
@@ -153,7 +153,7 @@ def delete_event(service, event_id, calendarId='primary'):
     logger.info("Successfully deleted event")
 
 
-def list(service):
+def list_calendars(service):
     """
     Generator function yielding a (summary, ID) tuple for every calendar.
 

@@ -200,7 +200,7 @@ def create(service):
         attendees.append(input('Enter email of Attendee #'+str(i+1)+': '))
 
     try:
-        methods.create(service, event_id=e_id, summary=summary,
+        methods.create_event(service, event_id=e_id, summary=summary,
                 location=location, description=description, start=start,
                 end=end, attendees=attendees)
         print('Event has been added!')

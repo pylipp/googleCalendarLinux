@@ -17,7 +17,7 @@ class ServiceTestCase(unittest.TestCase):
         summary = "Test summary"
         event_id = uuid.uuid4().hex
         start = "11/04/2017"
-        methods.create(self.service,
+        methods.create_event(self.service,
                 event_id=event_id,
                 summary=summary,
                 location="here",
@@ -38,7 +38,7 @@ class ServiceTestCase(unittest.TestCase):
         self.assertEqual(len(events) + 1, nr_events)
 
     def test_list(self):
-        calendars = dict(methods.list(self.service))
+        calendars = dict(methods.list_calendars(self.service))
         # assuming the calendar list contains at least the 'Week numbers'
         self.assertGreaterEqual(len(calendars), 1)
         self.assertIn("Week Numbers", calendars.keys())
@@ -51,7 +51,7 @@ class ServiceTestCase(unittest.TestCase):
         summary = "Event with source link to GitHub"
         start = "16/04/2017"
         event_id = uuid.uuid4().hex
-        methods.create(self.service,
+        methods.create_event(self.service,
                 event_id=event_id,
                 summary=summary,
                 start="{} 08:00:00".format(start),
@@ -69,7 +69,7 @@ class ServiceTestCase(unittest.TestCase):
 
     def test_create_without_event_id(self):
         start = "16/04/2017"
-        event_id = methods.create(self.service,
+        event_id = methods.create_event(self.service,
                 start="{} 08:00:00".format(start),
                 end="{} 16:00:00".format(start)
                 )
