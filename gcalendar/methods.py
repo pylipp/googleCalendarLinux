@@ -163,7 +163,7 @@ def list(service):
     """
 
     response = service.calendarList().list().execute()
-    logger.info("Received response: {}".format(response))
+    logger.info("Nr. of calendars found: {}".format(len(response["items"])))
 
     for item in response["items"]:
         yield item["summary"], item["id"]
