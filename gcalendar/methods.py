@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+"""Wrappers around the Google Calendar API to interact with events and
+calendars."""
+
 import uuid
 import logging
 
@@ -37,6 +40,9 @@ def create(service, calendarId='primary', event_id=None, summary="",
     :param enable_reminders: If true (default), send email a day before the
         event and display a popup 10 minutes in advance.
     :type enable_reminders: bool
+
+    :raises AttributeError: if any argument of summary, start or end is unspecified
+    :raises Errors are propagated from the apiclient module.
     """
 
     if not all([summary, start, end]):
@@ -91,6 +97,8 @@ def fetch_events(service, calendarId='primary', start=None, end=None):
     :param end: end date of the query in format dd/mm/yyyy. By default, this is
         24 hours after the start date.
     :type end: str
+
+    :returns list[dict]
     """
 
     if start is None:
@@ -138,6 +146,8 @@ def list(service):
 
     Convenient to find out the human-readable name (summary) and the ID of the
     calendar.
+
+    :yields tuple(str, str)
     """
 
     response = service.calendarList().list().execute()
