@@ -47,6 +47,25 @@ class ServiceTestCase(unittest.TestCase):
         event_id = uuid.uuid4().hex
         self.assertRaises(http.HttpError, methods.delete_event, self.service, event_id)
 
+    def test_create_event_body_kwargs(self):
+        summary = "Event with source link to GitHub"
+        start = "16/04/2017"
+        event_id = uuid.uuid4().hex
+        methods.create(self.service,
+                event_id=event_id,
+                summary=summary,
+                start="{} 08:00:00".format(start),
+                end="{} 16:00:00".format(start),
+                source={
+                    "url": "https://github.com/pylipp/googleCalendarLinux",
+                    "title": "Python package to interact with Google Calendar"
+                    }
+                )
+
+        events = methods.fetch_events(self.service, start=start)
+        self.assertIn(summary, [event["summary"] for event in events])
+
+        methods.delete_event(self.service, event_id)
 
 if __name__ == "__main__":
     unittest.main()

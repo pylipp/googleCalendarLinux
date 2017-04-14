@@ -19,7 +19,7 @@ logger.addHandler(handler)
 
 def create(service, calendarId='primary', event_id=None, summary="",
         location="", description="", start=None, end=None, attendees=None,
-        enable_reminders=True):
+        enable_reminders=True, **body_kwargs):
     """
     Create an event request object and insert it in the calendar's events.
 
@@ -40,6 +40,11 @@ def create(service, calendarId='primary', event_id=None, summary="",
     :param enable_reminders: If true (default), send email a day before the
         event and display a popup 10 minutes in advance.
     :type enable_reminders: bool
+
+    :param body_kwargs: Its contents are added to the event body. This allows
+        for adding custom fields acc. to the specification, e.g. recurrence.
+        This will also overwrite fields that are redefined.
+        (https://developers.google.com/resources/api-libraries/documentation/calendar/v3/python/latest/calendar_v3.events.html#insert)
 
     :raises AttributeError: if any argument of summary, start or end is unspecified
     :raises Errors are propagated from the apiclient module.
@@ -78,6 +83,8 @@ def create(service, calendarId='primary', event_id=None, summary="",
                 {'method': 'popup', 'minutes': 10},
                 ],
             }
+
+    event.update(body_kwargs)
 
     logger.info("Created event: {}".format(event))
     response = service.events().insert(calendarId=calendarId, body=event).execute()
