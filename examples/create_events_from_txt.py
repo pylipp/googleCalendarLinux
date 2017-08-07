@@ -26,8 +26,8 @@ with open(os.path.join(script_dir, "2017_working_hours.txt")) as f:
 
         try:
             date, hours = line.strip().split()
-            # start the day at 9am
-            start = maya.parse(date).add(hours=9)
+            # start the day at 9am, putting 'day_first' as a reminder
+            start = maya.parse(date, day_first=True).add(hours=9)
             end = start.add(hours=float(hours))
             workday = WorkDay(
                     start.datetime().strftime("%d/%m/%Y %H:%M:%S"),
